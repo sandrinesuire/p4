@@ -7,12 +7,40 @@ from . import settings as s
 from .models import Player
 
 
-class View:
+class ApplicationView:
     """View class for chess application"""
 
     def __init__(self):
         """Method of initialize"""
-        print("\nBienvenue")
+        print("\nMenu Principal")
+
+    @staticmethod
+    def start_msg() -> str:
+        return f"{s.MAIN} : Menu principal\n"
+
+
+class QuitView:
+    """View class for chess application"""
+
+    @staticmethod
+    def start_msg() -> str:
+        return f"{s.QUIT} : quitter\n"
+
+    @staticmethod
+    def quit_msg() -> str:
+        return f"Bye Bye"
+
+
+class TournamentView:
+    """View class for chess application"""
+
+    def __init__(self):
+        """Method of initialize"""
+        print("\nMenu Tournoie")
+
+    @staticmethod
+    def tournament_msg() -> str:
+        return f"{s.TOURNAMENT} : Tournoie d'échecs\n"
 
     @staticmethod
     def quit_msg() -> str:
@@ -107,6 +135,9 @@ class View:
 
     def display_player(self, player):
         print(f"joueur {player.first_name} {player.last_name} créer\n")
+
+    def display_no_players(self):
+        print(f"Merci de composer l'équipe des joueurs avant de modifier leurs classement\n")
 
 
 

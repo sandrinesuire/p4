@@ -1,9 +1,11 @@
 PLAYERS_NUMBER = 8
 ROUNDS_NUMBER = 4
 QUIT = "q"
+TOURNAMENT = "s"
 MALE = "m"
 FEMININE = "f"
 RANKING = "r"
+MAIN = "m"
 WIN_P1 = 1
 WIN_P2 = 2
 WIN_NULL = 0

@@ -1,5 +1,5 @@
 """Main file of chess application"""
-from app.controlers import Controller
+from app.controlers import ApplicationController
 
 """
 - les print et messages sont dans les vues
@@ -15,7 +15,8 @@ class Application:
 
     def __init__(self):
         """Method of initialize"""
-        self.controller = Controller()
+        self.controller = ApplicationController()
+        self.controller.start()
 
 
 if __name__ == "__main__":

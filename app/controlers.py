@@ -3,29 +3,77 @@ import sys
 
 from typing import List
 
-from .models import Player, Tournament, Round
-from .settings import PLAYERS_NUMBER, QUIT, RANKING, RANDOM_PLAYERS
-from .views import View
+from .models import Player, Tournament, Round, Menu, MenuAction, Action
+from .settings import PLAYERS_NUMBER, QUIT, RANKING, RANDOM_PLAYERS, TOURNAMENT, MAIN
+from .views import QuitView, TournamentView, ApplicationView
 
 
 class Controller:
+
+    menu = None
+
+    def input(self, text=""):
+        answer_t = "_______________________\n"
+        for m_action in self.menu.menu_actions:
+            answer_t += m_action.answer_text
+        for action in self.menu.actions:
+            answer_t += action.answer_text
+        answer_t += "_______________________\n"
+        answer_t += text
+        menu_action_answers = [m_action.answer_choice for m_action in
+                               self.menu.menu_actions]
+        action_answers = [action.answer_choice for action in self.menu.actions]
+        answer = None
+        while not answer:
+            answer = input(answer_t)
+            if answer in menu_action_answers:
+                controller = \
+                [m_action.controller for m_action in self.menu.menu_actions if
+                 answer == m_action.answer_choice][0]
+                return controller().start()
+            elif answer in action_answers:
+                action = [action.action for action in self.menu.actions if
+                          answer == action.answer_choice][0]
+                return getattr(self, action)()
+            elif text:
+                return answer
+            else:
+                answer = None
+
+    def start(self):
+        self.input()
+
+
+class ApplicationController(Controller):
+
+    def __init__(self):
+        self.view = ApplicationView()
+        self.menu = Menu()
+        self.menu.menu_actions.append(MenuAction(TournamentController, TOURNAMENT, TournamentView.tournament_msg()))
+        self.menu.menu_actions.append(MenuAction(QuitController, QUIT, QuitView.start_msg()))
+
+
+class QuitController:
+
+    def __init__(self):
+        self.view = QuitView()
+        sys.exit(self.view.quit_msg())
+
+
+class TournamentController(Controller):
     """Class for Chess Tournament Controller"""
 
     tournament = None
     view = None
 
     def __init__(self):
-        """Method of initialize"""
-        self.view = View()
-        self.run = True
-        self.start()
+        self.menu = Menu()
+        self.view = TournamentView()
+        self.menu.menu_actions.append(MenuAction(ApplicationController, MAIN, ApplicationView.start_msg()))
+        self.menu.actions.append(Action(RANKING, self.view.rank_menu_msg(), "ranking"))
 
-    def input(self, text):
-        menu = self.get_menu()
-        response = input(f"{menu}\n{text}").lower()
-        if response == QUIT:
-            sys.exit(self.view.quit_msg())
-        elif response == RANKING and self.tournament and self.tournament.players:
+    def ranking(self):
+        if self.tournament and self.tournament.players:
             ordered_players = sorted(self.tournament.players,
                                      key=lambda x: (-x.point, x.ranking))
             self.view.display_players_ranking(ordered_players)
@@ -35,8 +83,8 @@ class Controller:
             ranking = self.get_info_from_message(self.view.get_ranking_player_input_msg(player))
 
             player.ranking = ranking
-
-        return response
+        else:
+            self.view.display_no_players()
 
     def get_menu(self):
         menu = self.view.quit_menu_msg()
@@ -46,9 +94,8 @@ class Controller:
 
     def start(self):
         """Method starting tournament"""
-        while self.run:
-            self.tournament = self.create_tournament()
-            self.start_tournament()
+        self.tournament = self.create_tournament()
+        self.start_tournament()
         sys.exit(self.view.quit_msg())
 
     def start_tournament(self):
@@ -70,7 +117,7 @@ class Controller:
         for player in ordered_players:
             ranking = self.get_info_from_message(self.view.get_ranking_player_input_msg(player))
             player.ranking = ranking
-        sys.exit(self.view.display_quit())
+        sys.exit(self.view.quit_msg())
 
     def register_results_for_round(self, round):
         """Method registrering results"""
