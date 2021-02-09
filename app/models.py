@@ -10,33 +10,7 @@ from tinydb import TinyDB, Query, where
 from app.settings import ROUNDS_NUMBER, PLAYERS_NUMBER
 
 
-class Action:
-
-    def __init__(self, answer_choice, answer_text, action):
-
-        self.answer_choice = answer_choice
-        self.answer_text = answer_text
-        self.action = action
-
-
-class MenuAction:
-    controller = None
-
-    def __init__(self, controller, answer_choice, answer_text):
-        self.controller = controller
-        self.answer_choice = answer_choice
-        self.answer_text = answer_text
-
-class Menu:
-
-    menu_actions = []
-    actions = []
-    def __init__(self):
-        self.menu_actions = []
-        self.actions = []
-
-
-class DBObject:
+class Manager:
     
     indice = None
     db = TinyDB('chess.json')
@@ -85,7 +59,7 @@ class DBObject:
         self.save()
 
 
-class Player(DBObject):
+class Player(Manager):
     """Class of Player Chess"""
 
     db = TinyDB('chess.json')
@@ -131,7 +105,7 @@ class TimeType(Enum):
     RAPID = 'rapid'
 
 
-class Tournament(DBObject):
+class Tournament(Manager):
     """Class of Chess tournament"""
 
     db = TinyDB('chess.json')

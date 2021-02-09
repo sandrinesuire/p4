@@ -3,7 +3,8 @@ import sys
 
 from typing import List
 
-from .models import Player, Tournament, Round, Menu, MenuAction, Action
+from .models import Player, Tournament, Round
+from .utils import Action, MenuAction, Menu
 from .settings import PLAYERS_NUMBER, QUIT, RANKING, RANDOM_PLAYERS, TOURNAMENT, MAIN
 from .views import QuitView, TournamentView, ApplicationView
 
@@ -11,66 +12,82 @@ from .views import QuitView, TournamentView, ApplicationView
 class Controller:
 
     menu = None
+    view = None
 
-    def input(self, text=""):
-        answer_t = "_______________________\n"
-        for m_action in self.menu.menu_actions:
-            answer_t += m_action.answer_text
-        for action in self.menu.actions:
-            answer_t += action.answer_text
-        answer_t += "_______________________\n"
-        answer_t += text
-        menu_action_answers = [m_action.answer_choice for m_action in
-                               self.menu.menu_actions]
-        action_answers = [action.answer_choice for action in self.menu.actions]
+    def input(self, message="", menu=True):
+        if isinstance(message, str):
+            message = (message, str)
+        if menu:
+            self.print_menu()
+
+        answer_t = message[0]
+        menu_action_answers = [m_action.menu_touch for m_action in self.menu.menu_actions]
+        action_answers = [action.menu_touch for action in self.menu.actions]
+
         answer = None
         while not answer:
-            answer = input(answer_t)
+            answer = message[1](input(answer_t))
             if answer in menu_action_answers:
-                controller = \
-                [m_action.controller for m_action in self.menu.menu_actions if
-                 answer == m_action.answer_choice][0]
+                controller = [m_action.controller for m_action in self.menu.menu_actions if answer == m_action.menu_touch][0]
                 return controller().start()
             elif answer in action_answers:
-                action = [action.action for action in self.menu.actions if
-                          answer == action.answer_choice][0]
-                return getattr(self, action)()
-            elif text:
-                return answer
-            else:
+                action = [action.action for action in self.menu.actions if answer == action.menu_touch][0]
+                answer = getattr(self, action)()
+            if len(message) == 3 and answer not in message[2]:
                 answer = None
+            else:
+                return answer
+
+    def print_menu(self):
+        print("| _______________________")
+        for m_action in self.menu.menu_actions:
+            m_action.menu_text()
+        for action in self.menu.actions:
+            getattr(self.view, action.menu_text)()
+        print("| _______________________\n")
+
+    def print_space(self):
+        print("\n")
+
+
+
+class ApplicationController(Controller):
+    view = ApplicationView
+    menu_touch = MAIN
+
+    def __init__(self):
+        self.view = ApplicationView()
+        self.menu = Menu()
+        self.menu.menu_actions.append(MenuAction(TournamentController))
+        self.menu.menu_actions.append(MenuAction(QuitController))
 
     def start(self):
         self.input()
 
 
-class ApplicationController(Controller):
-
-    def __init__(self):
-        self.view = ApplicationView()
-        self.menu = Menu()
-        self.menu.menu_actions.append(MenuAction(TournamentController, TOURNAMENT, TournamentView.tournament_msg()))
-        self.menu.menu_actions.append(MenuAction(QuitController, QUIT, QuitView.start_msg()))
-
-
-class QuitController:
+class QuitController(Controller):
+    view = QuitView
+    menu_touch = QUIT
 
     def __init__(self):
         self.view = QuitView()
-        sys.exit(self.view.quit_msg())
+
+    def start(self):
+        sys.exit(self.view.get_quit_msg())
 
 
 class TournamentController(Controller):
     """Class for Chess Tournament Controller"""
 
     tournament = None
-    view = None
+    view = TournamentView
+    menu_touch = TOURNAMENT
 
     def __init__(self):
-        self.menu = Menu()
         self.view = TournamentView()
-        self.menu.menu_actions.append(MenuAction(ApplicationController, MAIN, ApplicationView.start_msg()))
-        self.menu.actions.append(Action(RANKING, self.view.rank_menu_msg(), "ranking"))
+        self.menu = Menu()
+        self.menu.menu_actions.append(MenuAction(ApplicationController))
+        self.menu.actions.append(Action(RANKING, "rank_menu", "ranking"))
 
     def ranking(self):
         if self.tournament and self.tournament.players:
@@ -78,25 +95,20 @@ class TournamentController(Controller):
                                      key=lambda x: (-x.point, x.ranking))
             self.view.display_players_ranking(ordered_players)
 
-            num = self.get_info_from_message(self.view.get_ranking_players_input_msg())
+            num = self.input(self.view.get_ranking_players_input_msg(), False)
             player = [player for player in self.tournament.players if player.indice == num][0]
-            ranking = self.get_info_from_message(self.view.get_ranking_player_input_msg(player))
+            ranking = self.input(self.view.get_ranking_player_input_msg(player), False)
 
             player.ranking = ranking
         else:
             self.view.display_no_players()
 
-    def get_menu(self):
-        menu = self.view.quit_menu_msg()
-        if self.tournament and self.tournament.players:
-            menu += self.view.rank_menu_msg()
-        return menu
-
     def start(self):
         """Method starting tournament"""
+        self.print_menu()
         self.tournament = self.create_tournament()
         self.start_tournament()
-        sys.exit(self.view.quit_msg())
+        sys.exit(self.view.get_quit_msg())
 
     def start_tournament(self):
         self.tournament.players = self.add_players()
@@ -104,10 +116,10 @@ class TournamentController(Controller):
         self.tournament.save()
         for round in self.tournament.rounds:
             self.generate_matches(round)
-            start = self.get_info_from_message(self.view.get_start_input_msg(round))
+            start = self.input(self.view.get_start_input_msg(round), True)
             if start:
                 round.start()
-            end = self.get_info_from_message(self.view.get_end_input_msg(round))
+            end = self.input(self.view.get_end_input_msg(round), False)
             if end:
                 round.end()
             self.register_results_for_round(round)
@@ -115,17 +127,16 @@ class TournamentController(Controller):
         ordered_players = sorted(self.tournament.players, key=lambda x: (-x.point, x.ranking))
         self.view.display_end_tournament_ranking_msg(ordered_players)
         for player in ordered_players:
-            ranking = self.get_info_from_message(self.view.get_ranking_player_input_msg(player))
+            ranking = self.input(self.view.get_ranking_player_input_msg(player), False)
             player.ranking = ranking
-        sys.exit(self.view.quit_msg())
 
     def register_results_for_round(self, round):
         """Method registrering results"""
+        self.print_space()
         for match in round.matches:
             player1 = match[0][0]
             player2 = match[1][0]
-            message = self.view.register_result_for_round_input_msg(player1, player2)
-            result = self.get_info_from_message(message)
+            result = self.input(self.view.register_result_for_round_input_msg(player1, player2))
             if result == 0:
                 player1.point += 0.5
                 player2.point += 0.5
@@ -169,7 +180,7 @@ class TournamentController(Controller):
         matches = []
         end = (self.tournament.players_number // 2) * 2
         ordered_players = sorted(self.tournament.players[0:end], key=lambda x: (-x.point, x.ranking))
-        for num in range(0,end,2):
+        for num in range(0, end, 2):
             player1 = ordered_players[num]
             player2 = ordered_players[num+1]
             matches.append(([player1, player1.point], [player2, player2.point]))
@@ -179,7 +190,7 @@ class TournamentController(Controller):
         """Method adding players to tournament"""
         players = []
         complet = Player.existing_n_instances(PLAYERS_NUMBER)
-        answer = self.get_info_from_message(self.view.add_players_input_msg(complet))
+        answer = self.input(self.view.add_players_input_msg(complet), True)
         if answer == RANDOM_PLAYERS:
             players = Player.get_n_first_instances(PLAYERS_NUMBER)
         else:
@@ -201,9 +212,9 @@ class TournamentController(Controller):
 
     def create_tournament(self) -> Tournament:
         """Method creating tournament from user information"""
-        messages = self.view.creation_tournament_input_msg()
-        kwargs = self.get_infos_from_messages(messages)
+        kwargs = self.get_infos_from_messages(self.view.creation_tournament_input_msg())
         tournament = Tournament(**kwargs)
+        self.print_space()
         return tournament
 
     def create_player(self, kwargs) -> Player:
@@ -216,33 +227,7 @@ class TournamentController(Controller):
     def get_infos_from_messages(self, messages):
         """Method collecting infos for tournament creation"""
         kwargs = {}
-        for k,v in messages.items():
-            answer = None
-            while not answer:
-                answer_inp = self.input(v[0])
-                try:
-                    answer = v[1](answer_inp)
-                    if len(v) == 3:
-                        if answer not in v[2]:
-                            answer = None
-                    if answer:
-                        kwargs[k] = answer
-                except:
-                    answer = None
-
+        for k,message in messages.items():
+            answer = self.input(message, False)
+            kwargs[k] = answer
         return kwargs
-
-    def get_info_from_message(self, message):
-        """Method collecting infos for tournament creation"""
-        answer = None
-        while not answer:
-            answer_inp = self.input(message[0])
-            try:
-                answer = message[1](answer_inp)
-                if len(message) == 3:
-                    if answer not in message[2]:
-                        answer = None
-            except:
-                answer = None
-
-        return answer
