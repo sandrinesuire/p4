@@ -4,73 +4,50 @@ import sys
 from typing import List
 
 from .models import Player, Tournament, Round
-from .utils import Action, MenuAction, Menu
-from .settings import PLAYERS_NUMBER, QUIT, RANKING, RANDOM_PLAYERS, TOURNAMENT, MAIN
+from .utils import Action, MenuAction, Menu, CustomInput
+from . import settings as s
 from .views import QuitView, TournamentView, ApplicationView
 
 
 class Controller:
+    """
+    Class for generic controller
+    """
 
-    menu = None
-    view = None
-
-    def input(self, message="", menu=True):
-        if isinstance(message, str):
-            message = (message, str)
-        if menu:
-            self.print_menu()
-
-        answer_t = message[0]
-        menu_action_answers = [m_action.menu_touch for m_action in self.menu.menu_actions]
-        action_answers = [action.menu_touch for action in self.menu.actions]
-
-        answer = None
-        while not answer:
-            answer = message[1](input(answer_t))
-            if answer in menu_action_answers:
-                controller = [m_action.controller for m_action in self.menu.menu_actions if answer == m_action.menu_touch][0]
-                return controller().start()
-            elif answer in action_answers:
-                action = [action.action for action in self.menu.actions if answer == action.menu_touch][0]
-                answer = getattr(self, action)()
-            if len(message) == 3 and answer not in message[2]:
-                answer = None
-            else:
-                return answer
-
-    def print_menu(self):
-        print("| _______________________")
-        for m_action in self.menu.menu_actions:
-            m_action.menu_text()
-        for action in self.menu.actions:
-            getattr(self.view, action.menu_text)()
-        print("| _______________________\n")
-
-    def print_space(self):
-        print("\n")
-
+    def __init__(self):
+        """Initialize method"""
+        self.input = CustomInput(self)
+        self.menu = Menu()
 
 
 class ApplicationController(Controller):
+    """
+    Class for application
+    """
+
     view = ApplicationView
-    menu_touch = MAIN
+    menu_touch = s.MAIN
+    menu_text = f"| {s.MAIN} : Menu principal"
 
     def __init__(self):
         self.view = ApplicationView()
         self.menu = Menu()
         self.menu.menu_actions.append(MenuAction(TournamentController))
         self.menu.menu_actions.append(MenuAction(QuitController))
+        self.input = CustomInput(self)
 
     def start(self):
-        self.input()
+        self.input("", False)
 
 
 class QuitController(Controller):
     view = QuitView
-    menu_touch = QUIT
+    menu_touch = s.QUIT
+    menu_text = f"| {s.QUIT} : Quitter"
 
     def __init__(self):
         self.view = QuitView()
+        self.input = CustomInput(self)
 
     def start(self):
         sys.exit(self.view.get_quit_msg())
@@ -80,14 +57,15 @@ class TournamentController(Controller):
     """Class for Chess Tournament Controller"""
 
     tournament = None
-    view = TournamentView
-    menu_touch = TOURNAMENT
+    menu_touch = s.TOURNAMENT
+    menu_text = f"| {s.TOURNAMENT} : Tournoie d'échecs"
 
     def __init__(self):
         self.view = TournamentView()
         self.menu = Menu()
         self.menu.menu_actions.append(MenuAction(ApplicationController))
-        self.menu.actions.append(Action(RANKING, "rank_menu", "ranking"))
+        self.menu.actions.append(Action(s.RANKING, "rank_menu", "ranking"))
+        self.input = CustomInput(self)
 
     def ranking(self):
         if self.tournament and self.tournament.players:
@@ -105,7 +83,6 @@ class TournamentController(Controller):
 
     def start(self):
         """Method starting tournament"""
-        self.print_menu()
         self.tournament = self.create_tournament()
         self.start_tournament()
         sys.exit(self.view.get_quit_msg())
@@ -132,7 +109,6 @@ class TournamentController(Controller):
 
     def register_results_for_round(self, round):
         """Method registrering results"""
-        self.print_space()
         for match in round.matches:
             player1 = match[0][0]
             player2 = match[1][0]
@@ -189,12 +165,12 @@ class TournamentController(Controller):
     def add_players(self) -> List[Player]:
         """Method adding players to tournament"""
         players = []
-        complet = Player.existing_n_instances(PLAYERS_NUMBER)
+        complet = Player.existing_n_instances(s.PLAYERS_NUMBER)
         answer = self.input(self.view.add_players_input_msg(complet), True)
-        if answer == RANDOM_PLAYERS:
-            players = Player.get_n_first_instances(PLAYERS_NUMBER)
+        if answer == s.RANDOM_PLAYERS:
+            players = Player.get_n_first_instances(s.PLAYERS_NUMBER)
         else:
-            missing_players_number = PLAYERS_NUMBER
+            missing_players_number = s.PLAYERS_NUMBER
             while missing_players_number:
                 player = self.get_player()
                 self.view.display_player(player)
@@ -214,7 +190,6 @@ class TournamentController(Controller):
         """Method creating tournament from user information"""
         kwargs = self.get_infos_from_messages(self.view.creation_tournament_input_msg())
         tournament = Tournament(**kwargs)
-        self.print_space()
         return tournament
 
     def create_player(self, kwargs) -> Player:

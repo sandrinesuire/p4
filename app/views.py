@@ -14,17 +14,9 @@ class ApplicationView:
         """Method of initialize"""
         print("\n| Menu Principal")
 
-    @staticmethod
-    def menu_text() -> str:
-        print(f"| {s.MAIN} : Menu principal")
-
 
 class QuitView:
     """View class for chess application"""
-
-    @staticmethod
-    def menu_text() -> str:
-        print(f"| {s.QUIT} : Quitter")
 
     def get_quit_msg(self) -> str:
         return f"Bye Bye"
@@ -41,10 +33,6 @@ class TournamentView:
     MENU TEXT
     """
 
-    @staticmethod
-    def menu_text() -> str:
-        print(f"| {s.TOURNAMENT} : Tournoie d'échecs")
-
     def get_quit_msg(self) -> str:
         return f"Bye Bye"
 
@@ -56,7 +44,7 @@ class TournamentView:
     """
 
     def add_players_input_msg(self, complet=True) -> Tuple[str, Type[str], List[set]]:
-        msg = f"{s.ADD_PLAYER} : ajouter un joueur\n"
+        msg = f"\n{s.ADD_PLAYER} : ajouter un joueur\n"
         if complet:
             msg += f"{s.RANDOM_PLAYERS} : prendre aléatoiremenr les joueurs "
             return (msg, str, [s.ADD_PLAYER, s.RANDOM_PLAYERS])
@@ -88,7 +76,7 @@ class TournamentView:
 
     def register_result_for_round_input_msg(self, player1: Player, player2: Player) -> Tuple[
         str, Any, List[str]]:
-        return (f"match: {str(player1)}/{str(player2)}\n{s.WIN_P1} : joueur 1 à"
+        return (f"\nmatch: {str(player1)}/{str(player2)}\n{s.WIN_P1} : joueur 1 à"
                 f" gagnant\n{s.WIN_P2} : joueur 2 gagnant"
                 f" \n{s.WIN_NULL} : match null\nrésultat : ", int,
                 [s.WIN_P1, s.WIN_P2, s.WIN_NULL])
