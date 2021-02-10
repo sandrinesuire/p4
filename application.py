@@ -1,5 +1,5 @@
 """Main file of chess application"""
-from app.controlers import ApplicationController
+from app.controllers.application import ApplicationController
 
 
 class Application:
