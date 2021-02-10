@@ -1,3 +1,7 @@
+"""
+Contain controller tournament
+"""
+
 from app import settings as s
 from app.controllers.application import Controller, ApplicationController
 from app.models.players import Player
@@ -54,7 +58,8 @@ class TournamentController(Controller):
                 round.end()
             self.register_results_for_round(round)
 
-        ordered_players = sorted(self.tournament.players, key=lambda x: (-x.point, x.ranking))
+        ordered_players = sorted(self.tournament.players, key=lambda x: (-x.point,
+                                                                         x.ranking))
         self.view.display_end_tournament_ranking_msg(ordered_players)
         for player in ordered_players:
             ranking = self.input(self.view.get_ranking_player_input_msg(player), False)
@@ -114,19 +119,23 @@ class TournamentController(Controller):
         """Method generating players pairs for first round of tournament"""
         matches = []
         end = (self.tournament.players_number // 2) * 2
-        ordered_players = sorted(self.tournament.players[0:end], key=lambda x: (x.point, -x.ranking))
+        ordered_players = sorted(self.tournament.players[0:end],
+                                 key=lambda x: (x.point, -x.ranking))
         middle = self.tournament.players_number // 2
         for num in range(middle):
             sup_player = ordered_players[num]
             inf_player = ordered_players[num + middle]
-            matches.append(([sup_player, sup_player.point], [inf_player, inf_player.point]))
+            matches.append(([sup_player, sup_player.point], [inf_player,
+                                                             inf_player.point]))
         return matches
 
-    def generate_other_rounds_matches(self) -> List[Tuple[list, List[Union[list, Any]]]]:
+    def generate_other_rounds_matches(self) -> List[Tuple[list,
+                                                          List[Union[list, Any]]]]:
         """Method generating players pairs for other rounds of tournament"""
         matches = []
         end = (self.tournament.players_number // 2) * 2
-        ordered_players = sorted(self.tournament.players[0:end], key=lambda x: (-x.point, x.ranking))
+        ordered_players = sorted(self.tournament.players[0:end],
+                                 key=lambda x: (-x.point, x.ranking))
         for num in range(0, end, 2):
             player1 = ordered_players[num]
             player2 = ordered_players[num+1]
@@ -138,7 +147,8 @@ class TournamentController(Controller):
         for match in round.matches:
             player1 = match[0][0]
             player2 = match[1][0]
-            result = self.input(self.view.register_result_for_round_input_msg(player1, player2))
+            result = self.input(self.view.register_result_for_round_input_msg(
+                player1, player2))
             if result == 0:
                 player1.point += 0.5
                 player2.point += 0.5
@@ -155,17 +165,18 @@ class TournamentController(Controller):
             self.view.display_players_ranking(ordered_players)
 
             num = self.input(self.view.get_choosing_players_input_msg(), False)
-            player = [player for player in self.tournament.players if player.indice == num][0]
+            player = [player for player in self.tournament.players if
+                      player.indice == num][0]
             ranking = self.input(self.view.get_ranking_player_input_msg(player), False)
 
             player.ranking = ranking
         else:
             self.view.display_no_players()
 
-    def get_infos_from_messages(self, messages: Tuple[Any]) -> Dict[Any]:
+    def get_infos_from_messages(self, messages: Any) -> Dict[Any]:
         """Method collecting infos for tournament creation"""
         kwargs = {}
-        for k,message in messages.items():
+        for k, message in messages.items():
             answer = self.input(message, False)
             kwargs[k] = answer
         return kwargs

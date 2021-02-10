@@ -1,3 +1,7 @@
+"""
+Contain controller parent and application and quit controller
+"""
+
 import sys
 
 from app import settings as s

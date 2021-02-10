@@ -1,3 +1,7 @@
+"""
+Contain tournament view
+"""
+
 from typing import Tuple, Type, List, Dict, Any
 
 from dateutil.parser import parse
@@ -30,14 +34,15 @@ class TournamentView:
     INPUT MESSAGE
     """
 
-    def add_players_input_msg(self, complet: bool = True) -> Tuple[str, Type[str], List[set]]:
+    def add_players_input_msg(self, complet: bool = True) -> \
+            Tuple[str, Type[str], List[set]]:
         """Method returning add players message for input, with text, parser method
         and possible answer accepted"""
         msg = f"\n{s.ADD_PLAYER} : ajouter un joueur\n"
         if complet:
             msg += f"{s.RANDOM_PLAYERS} : prendre aléatoiremenr les joueurs "
             return (msg, str, [s.ADD_PLAYER, s.RANDOM_PLAYERS])
-        return (msg, str, [s.ADD_PLAYER,])
+        return (msg, str, [s.ADD_PLAYER, ])
 
     def creation_tournament_input_msg(self) -> Dict[str, Tuple[str, Any]]:
         """Method returning tournament infos message for input, with text, parser method
@@ -47,15 +52,18 @@ class TournamentView:
             "location": ("Lieu du tournoi : ", str),
             "tournament_date": ("Date du tournoi (format 29-01-2021) : ", parse),
             "description": ("Description du tournoi : ", str),
-            "time_type": ("Type de temps du tournoi (bullet, blitz, ou rapid) : ", str, ["bullet", "blitz", "rapid"]),
+            "time_type": ("Type de temps du tournoi (bullet, blitz, ou rapid) : ", str,
+                          ["bullet", "blitz", "rapid"]),
         }
 
     def creation_player_input_msg(self) -> Dict[str, Tuple[str, Any]]:
         """Method returning infos player message for input, with text, parser method
         and possible answer accepted"""
         return {
-            "birth_date": ("Joueur non enregistré\nDate de naissance du joueur (format 29-01-2021) : ", parse),
-            "gender": ("Genre du joueur (m masculin, f feminin) : ", str, [s.MALE, s.FEMININE]),
+            "birth_date": ("Joueur non enregistré\nDate de naissance du joueur "
+                           "(format 29-01-2021) : ", parse),
+            "gender": ("Genre du joueur (m masculin, f feminin) : ", str,
+                       [s.MALE, s.FEMININE]),
         }
 
     def get_first_last_name_player_input_msg(self) -> Dict[str, Tuple[str, Any]]:
@@ -66,8 +74,9 @@ class TournamentView:
             "last_name": ("Prénom du joueur : ", str),
         }
 
-    def register_result_for_round_input_msg(self, player1: Player, player2: Player) -> Tuple[
-        str, Any, List[str]]:
+    def register_result_for_round_input_msg(self, player1: Player, player2: Player) -> \
+            Tuple[
+                str, Any, List[str]]:
         """Method returning result for round message for input, with text, parser method
         and possible answer accepted"""
         return (f"\nmatch: {str(player1)}/{str(player2)}\n{s.WIN_P1} : joueur 1 à"
@@ -98,8 +107,10 @@ class TournamentView:
     def get_ranking_player_input_msg(self, player: Player) -> Tuple[str, Any, range]:
         """Method returning ranking player message for input, with text, parser method
         and possible answer accepted"""
-        rank_ok = range(1, s.PLAYERS_NUMBER+1)
-        return (f"{player.first_name} {player.last_name}\nClassement souhaité : ", int, rank_ok)
+        rank_ok = range(1, s.PLAYERS_NUMBER + 1)
+        return (
+            f"{player.first_name} {player.last_name}\nClassement souhaité : ", int,
+            rank_ok)
 
     """
     DISPLAY PRINT
@@ -109,7 +120,8 @@ class TournamentView:
         """Method displaying ranking players at the end of tournament"""
         response = ""
         for player in players:
-            response += f"{player.first_name} {player.last_name} {player.point} points\n"
+            response += f"{player.first_name} {player.last_name} {player.point} " \
+                        f"points\n"
         response += "Merci de saisir le classement des joueurs\n"
         print(response)
 
@@ -117,7 +129,8 @@ class TournamentView:
         """Method displaying ranking of players before rank user"""
         response = "\n"
         for player in players:
-            response += f"joueur N°{player.indice} {player.first_name} {player.last_name} Classement : {player.ranking}\n"
+            response += f"joueur N°{player.indice} {player.first_name} " \
+                        f"{player.last_name} Classement : {player.ranking}\n"
         print(response)
 
     def display_player(self, player: Player):
@@ -126,4 +139,7 @@ class TournamentView:
 
     def display_no_players(self):
         """Method displaying warning infos for ranking without choosing all players"""
-        print(f"\nMerci de composer l'équipe des joueurs avant de modifier leurs classement\n")
+        print(
+            f"\nMerci de composer l'équipe des joueurs avant de modifier leurs "
+            f"classement\n"
+        )

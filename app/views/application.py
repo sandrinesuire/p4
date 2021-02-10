@@ -1,3 +1,8 @@
+"""
+Contain application and quit views
+"""
+
+
 class ApplicationView:
     """View class for chess application"""
 
