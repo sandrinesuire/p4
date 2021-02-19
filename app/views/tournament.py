@@ -116,6 +116,11 @@ class TournamentView:
     DISPLAY PRINT
     """
 
+    def player_chosed(self, player: Player):
+        """Method displaying player always choosed"""
+        response = f"{player.first_name} {player.last_name} a déjà été choisit"
+        print(response)
+
     def display_end_tournament_ranking_msg(self, players: List[Player]):
         """Method displaying ranking players at the end of tournament"""
         response = ""

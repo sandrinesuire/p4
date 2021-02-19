@@ -76,9 +76,13 @@ class TournamentController(Controller):
             missing_players_number = s.PLAYERS_NUMBER
             while missing_players_number:
                 player = self.get_player()
-                self.view.display_player(player)
-                players.append(player)
-                missing_players_number -= 1
+                if player not in players:
+                    self.view.display_player(player)
+                    players.append(player)
+                    missing_players_number -= 1
+                else:
+                    self.view.player_chosed(player)
+                    player = None
         return players
 
     def get_player(self) -> Player:
