@@ -33,10 +33,6 @@ class Player(Manager):
         self.opponent = opponent
         self.save()
 
-    def __key(self):
-        """ Method returning key for special method """
-        return (self.first_name, self.last_name)
-
     def __hash__(self):
         """ Method for compare self with other. """
         return hash(self.__key())
@@ -49,6 +45,10 @@ class Player(Manager):
     def __str__(self):
         """Method returning data when str method is called"""
         return f"Joueur {self.first_name} {self.last_name}"
+
+    def __key(self):
+        """ Method returning key for special method """
+        return (self.first_name, self.last_name)
 
     def save(self):
         """Saving method"""
@@ -67,4 +67,13 @@ class Player(Manager):
     def add_point(self, point: int):
         """ Method adding point. """
         self.point += point
+
+    def add_opponent(self, player):
+        """ Method adding opponent in opponent list. """
+        self.opponent.append(player.id)
+
+    def empty_opponent(self):
+        """ Method emptying opponent list. """
+        self.opponent = []
+
 
