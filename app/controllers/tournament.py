@@ -130,8 +130,8 @@ class TournamentController(Controller):
         for num in range(middle):
             sup_player = ordered_players[num]
             inf_player = ordered_players[num + middle]
-            sup_player.add_opponent(inf_player)
-            inf_player.add_opponent(sup_player)
+            sup_player.opponent.append(inf_player)
+            inf_player.opponent.append(sup_player)
             matches.append(([sup_player, sup_player.point], [inf_player,
                                                              inf_player.point]))
         return matches
@@ -143,9 +143,12 @@ class TournamentController(Controller):
         end = (self.tournament.players_number // 2) * 2
         ordered_players = sorted(self.tournament.players[0:end],
                                  key=lambda x: (-x.point, x.ranking))
-        for num in range(0, end, 2):
-            player1 = ordered_players[num]
-            player2 = ordered_players[num+1]
+        for num in range(0, int(end/2)):
+            player1 = ordered_players[0]
+            ordered_players.remove(player1)
+            i = player1.get_next_possible_player(ordered_players)
+            player2 = ordered_players[i]
+            ordered_players.remove(player2)
             player1.add_opponent(player2)
             player2.add_opponent(player1)
             matches.append(([player1, player1.point], [player2, player2.point]))

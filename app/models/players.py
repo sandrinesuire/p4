@@ -19,7 +19,7 @@ class Player(Manager):
     table = db.table(table_name)
 
     def __init__(self, first_name: str, last_name: str, birth_date: str or datetime,
-                 gender: str, opponent: List = [], ranking: int = None, point: int = None):
+                 gender: str, opponent = None, ranking: int = None, point: int = None):
         """Method of initialize"""
         super(Player, self).__init__()
         self.first_name = first_name
@@ -30,7 +30,7 @@ class Player(Manager):
         self.gender = gender
         self.ranking = ranking or 0
         self.point = point or 0
-        self.opponent = opponent
+        self.opponent = opponent or list() # if [] alors opponent à le même id pour tous les players ???
         self.save()
 
     def __hash__(self):
@@ -70,10 +70,16 @@ class Player(Manager):
 
     def add_opponent(self, player):
         """ Method adding opponent in opponent list. """
-        self.opponent.append(player.id)
+        self.opponent.append(player)
 
     def empty_opponent(self):
         """ Method emptying opponent list. """
         self.opponent = []
 
+    def get_next_possible_player(self, players):
+        """ Method testing if self could play with player. """
+        for i, player in enumerate(players):
+            if player not in self.opponent:
+                return i
+        raise ValueError("pb de joeurs ayant déjà joués ensemble")
 
