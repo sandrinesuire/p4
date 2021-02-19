@@ -33,7 +33,7 @@ class Menu:
 
     def add_actions(self, action: Action):
         """ Method adding action to actions list. """
-        self.menu_actions.append(action)
+        self.actions.append(action)
 
     def add_menu_actions(self, menu_action: MenuAction):
         """ Method adding menu action to menu_actions list. """
