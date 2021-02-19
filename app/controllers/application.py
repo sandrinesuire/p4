@@ -5,7 +5,6 @@ Contain controller parent and application and quit controller
 import sys
 
 from app import settings as s
-from app.controllers.tournament import TournamentController
 from app.utils import CustomInput, Menu, MenuAction
 from app.views.application import ApplicationView, QuitView
 
@@ -32,6 +31,7 @@ class ApplicationController(Controller):
         """Initialize metod"""
         self.view = ApplicationView()
         self.menu = Menu()
+        from app.controllers.tournament import TournamentController
         self.menu.menu_actions.append(MenuAction(TournamentController))
         self.menu.menu_actions.append(MenuAction(QuitController))
 

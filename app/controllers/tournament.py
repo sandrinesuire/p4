@@ -173,7 +173,7 @@ class TournamentController(Controller):
         else:
             self.view.display_no_players()
 
-    def get_infos_from_messages(self, messages: Any) -> Dict[Any]:
+    def get_infos_from_messages(self, messages: Any) -> dict:
         """Method collecting infos for tournament creation"""
         kwargs = {}
         for k, message in messages.items():
