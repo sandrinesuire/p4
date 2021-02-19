@@ -10,6 +10,7 @@ from dateutil import parser
 from tinydb import TinyDB, Query
 
 from app.models.models import Manager
+from app.models.players import Player
 from app.models.rounds import Round
 from app.settings import ROUNDS_NUMBER, PLAYERS_NUMBER
 
@@ -29,7 +30,7 @@ class Tournament(Manager):
     table_name = "tournaments"
     table = db.table(table_name)
 
-    players = None
+    players = []
     rounds = []
 
     def __init__(self, name: str, location: str, tournament_date: datetime,
@@ -95,3 +96,13 @@ class Tournament(Manager):
         }, ((q.tournament_date == str(self.tournament_date)) & (q.name == self.name)))
         self.indice = indice[0]
         return self
+
+    def add_players(self, players: List[Player]):
+        """ Method adding players to list of players. """
+        self.players = players
+
+    def add_rounds(self, rounds: List[Round]):
+        """ Method adding rounds to list of rounds. """
+        self.rounds = rounds
+
+

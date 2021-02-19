@@ -3,6 +3,7 @@ Contain model round
 """
 
 from datetime import datetime
+from typing import List
 
 from dateutil import parser
 
@@ -40,3 +41,8 @@ class Round:
     def end(self):
         """Method updating end date """
         self.end_date = datetime.now()
+
+    def add_matches(self, matches: List):
+        """ Method adding matches to matches list. """
+        self.matches = matches
+

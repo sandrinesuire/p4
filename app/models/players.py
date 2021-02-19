@@ -3,6 +3,7 @@ Contain model player
 """
 
 from datetime import datetime
+from typing import List
 
 from dateutil import parser
 from tinydb import TinyDB, Query
@@ -18,7 +19,7 @@ class Player(Manager):
     table = db.table(table_name)
 
     def __init__(self, first_name: str, last_name: str, birth_date: str or datetime,
-                 gender: str, ranking: int = None, point: int = None):
+                 gender: str, opponent: List = [], ranking: int = None, point: int = None):
         """Method of initialize"""
         super(Player, self).__init__()
         self.first_name = first_name
@@ -29,6 +30,7 @@ class Player(Manager):
         self.gender = gender
         self.ranking = ranking or 0
         self.point = point or 0
+        self.opponent = opponent
         self.save()
 
     def __str__(self):
@@ -48,3 +50,8 @@ class Player(Manager):
         }, ((q.first_name == self.first_name) & (q.last_name == self.last_name)))
         self.indice = indice[0]
         return self
+
+    def add_point(self, point: int):
+        """ Method adding point. """
+        self.point += point
+

@@ -27,8 +27,8 @@ class TournamentController(Controller):
         """Initialize metod"""
         self.view = TournamentView()
         self.menu = Menu()
-        self.menu.menu_actions.append(MenuAction(ApplicationController))
-        self.menu.actions.append(Action(s.RANKING, "display_rank_menu", "ranking"))
+        self.menu.add_menu_actions(MenuAction(ApplicationController))
+        self.menu.add_actions(Action(s.RANKING, "display_rank_menu", "ranking"))
         super(TournamentController, self).__init__()
 
     def start(self):
@@ -45,8 +45,8 @@ class TournamentController(Controller):
 
     def playing_tournament(self):
         """Method playing the tournament"""
-        self.tournament.players = self.add_players()
-        self.tournament.rounds = self.add_rounds()
+        self.tournament.add_players(self.add_players())
+        self.tournament.add_rounds(self.add_rounds())
         self.tournament.save()
         for round in self.tournament.rounds:
             self.generate_matches(round)
@@ -63,7 +63,7 @@ class TournamentController(Controller):
         self.view.display_end_tournament_ranking_msg(ordered_players)
         for player in ordered_players:
             ranking = self.input(self.view.get_ranking_player_input_msg(player), False)
-            player.ranking = ranking
+            player.update(ranking=ranking)
 
     def add_players(self) -> List[Player]:
         """Method adding players to tournament"""
@@ -110,9 +110,9 @@ class TournamentController(Controller):
     def generate_matches(self, round: Round):
         """Method generating players pairs rounds of tournament"""
         if round.round_num == 1:
-            round.matches = self.generate_first_round_matches()
+            round.add_matches(self.generate_first_round_matches())
         else:
-            round.matches = self.generate_other_rounds_matches()
+            round.add_matches(self.generate_other_rounds_matches())
         self.tournament.save()
 
     def generate_first_round_matches(self) -> List[Tuple[list, List[Union[list, Any]]]]:
@@ -150,12 +150,12 @@ class TournamentController(Controller):
             result = self.input(self.view.register_result_for_round_input_msg(
                 player1, player2))
             if result == 0:
-                player1.point += 0.5
-                player2.point += 0.5
+                player1.add_point(0.5)
+                player2.add_point(0.5)
             elif result == 1:
-                player1.point += 1
+                player1.add_point(1)
             elif result == 2:
-                player2.point += 1
+                player2.add_point(1)
 
     def ranking(self):
         """Method modifing the rank of player """
@@ -169,7 +169,7 @@ class TournamentController(Controller):
                       player.indice == num][0]
             ranking = self.input(self.view.get_ranking_player_input_msg(player), False)
 
-            player.ranking = ranking
+            player.update(ranking=ranking)
         else:
             self.view.display_no_players()
 

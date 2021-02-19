@@ -29,11 +29,11 @@ class ApplicationController(Controller):
 
     def __init__(self):
         """Initialize metod"""
+        from app.controllers.tournament import TournamentController
         self.view = ApplicationView()
         self.menu = Menu()
-        from app.controllers.tournament import TournamentController
-        self.menu.menu_actions.append(MenuAction(TournamentController))
-        self.menu.menu_actions.append(MenuAction(QuitController))
+        self.menu.add_menu_actions(MenuAction(TournamentController))
+        self.menu.add_menu_actions(MenuAction(QuitController))
 
         super(ApplicationController, self).__init__()
 

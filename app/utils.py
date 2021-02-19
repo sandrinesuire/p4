@@ -31,6 +31,14 @@ class Menu:
         self.menu_actions = []
         self.actions = []
 
+    def add_actions(self, action: Action):
+        """ Method adding action to actions list. """
+        self.menu_actions.append(action)
+
+    def add_menu_actions(self, menu_action: MenuAction):
+        """ Method adding menu action to menu_actions list. """
+        self.menu_actions.append(menu_action)
+
 
 class CustomInput:
     """Class representing input generic method overload with custom fonctionality"""
