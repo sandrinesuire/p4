@@ -56,7 +56,7 @@ class CustomInput:
         action_answers = [action.menu_touch for action in self.controller.menu.actions]
 
         answer = None
-        while not answer:
+        while answer is None:
             try:
                 answer = input(answer_t)
                 answer = message[1](answer)
